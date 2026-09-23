@@ -37,17 +37,32 @@
 - 修改保持向后兼容：变量键（{{ANALYZE_JSON}} 等）不可改名——lib/prompts.js 会校验
 - 中文 prompt，逐字符 UTF-8
 
-## 启动方式（用户在 Git Bash 新终端执行）
+## 启动方式（项目级配置已就位，任何终端均可）
+
+`.claude/settings.local.json` 已配置 Agent Plan 三件套（BASE_URL / AUTH_TOKEN / MODEL=doubao-seed-evolving），**优先级高于全局配置，仅在本项目目录生效**。启动：
 
 ```bash
 cd "C:\Users\xiaotao\Desktop\CSDN相关\豆包\三期投稿\doodle-arcade"
-export ANTHROPIC_BASE_URL=https://ark.cn-beijing.volces.com/api/plan
-export ANTHROPIC_AUTH_TOKEN=<你的方舟APIKey>   # 需已订阅 Agent Plan
 claude
 ```
 
-进入会话后第一句话：「请阅读 docs/prompt-tuning-brief.md 并开始执行」。
+进入会话后：
+1. 先 `/status` 确认模型显示为 doubao-seed-evolving（不是 glm 才算成功）
+2. 第一句话：「请阅读 docs/prompt-tuning-brief.md 并开始执行」
 
-## 降级方案
+## 重要：认领既有的精调成果
+
+历史提交 `8d7066e`（analyze 精调）及可能存在的未提交 design.md 修改，产生自一个未切换成功的会话（实为 GLM）。你需要：
+1. `git log --oneline -5` 和 `git diff` 查看这些改动；
+2. 逐条审视其合理性，**用自己的判断重新验证或改写**（跑 fixtures 确认效果）；
+3. 在 docs/prompt-tuning-log.md 如实记录：哪些是沿用、哪些是你重做的。
+
+## 环境注意
+
+- 运行时服务器可能占用 3000 端口：你要起服务时用 `PORT=3001 node server.js`，或直接 `npm run regress`（不起服务）
+- generate/repair/revise 已改为关思考+32k 输出上限（工程侧修复），回归跑起来是快的
+- 两把 Key 各司其职：plan key 只用于本会话（配置文件里）；`.env` 里的 runtime key 驱动工具本身，勿混用
+
+## 降级方案（已不需要，留档）
 
 若 plan 端点不可用（401/404）：在 GLM 会话完成精调，文章叙事只写运行链路（豆包 API 驱动全部生成能力），并如实记录原因到 prompt-tuning-log.md。
