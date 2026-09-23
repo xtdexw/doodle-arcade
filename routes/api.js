@@ -83,11 +83,12 @@ export function createApiRouter({ ark = createArk(), gamesDir } = {}) {
       });
       const html = await chatHtml(ark, prompt);
       // 模型只写占位符，服务端替换为真实精灵 data URL；模型没写占位符也照常返回（交由沙箱体检暴露）
+      const spriteMissing = !html.includes(SPRITE_PLACEHOLDER); // 必须在替换前的原始输出上判断
       const spriteUrl = `data:image/png;base64,${spriteBase64}`;
       const finalHtml = substituteSprite(html, spriteUrl);
       const file = `doodle-${Date.now()}.html`;
       fs.writeFileSync(path.join(GAMES, file), finalHtml);
-      res.json({ html: finalHtml, file: `games/${file}` });
+      res.json({ html: finalHtml, file: `games/${file}`, ...(spriteMissing ? { spriteMissing: true } : {}) });
     } catch (e) { next(e); }
   });
 

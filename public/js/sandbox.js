@@ -51,7 +51,10 @@ export function createSandbox(container) {
     return new Promise((resolve) => {
       const f = freshIframe();
       const timer = setTimeout(
-        () => resolve({ ok: false, errors: [`TIMEOUT: ${SANDBOX_TIMEOUT_MS}ms 内无首帧渲染`] }),
+        () => {
+          window.removeEventListener('message', onMsg); // 超时路径同样要摘监听器，否则泄漏
+          resolve({ ok: false, errors: [`TIMEOUT: ${SANDBOX_TIMEOUT_MS}ms 内无首帧渲染`] });
+        },
         SANDBOX_TIMEOUT_MS,
       );
       const onMsg = (ev) => {
@@ -64,6 +67,12 @@ export function createSandbox(container) {
       window.addEventListener('message', onMsg);
       f.srcdoc = buildSrcdoc(html);
     });
+  }
+
+  function reset() {
+    versions = [];
+    current = -1;
+    if (iframe) { iframe.remove(); iframe = null; }
   }
 
   async function show(i) {
@@ -80,6 +89,7 @@ export function createSandbox(container) {
     load,
     pushVersion,
     show,
+    reset,
     get versions() { return versions; },
     get current() { return current; },
   };

@@ -59,6 +59,19 @@ test('generate 用占位符契约：模型输出的 __DOODLE_SPRITE__ 被替换�
   assert.equal(r.status, 200);
   assert.ok(r.payload.html.includes('data:image/png;base64,QUJD'));
   assert.ok(!r.payload.html.includes('__DOODLE_SPRITE__'));
+  assert.ok(!r.payload.spriteMissing); // 写了占位符就不应有遗漏标记
+});
+
+test('generate 模型遗漏占位符时返回 spriteMissing 标记', async (t) => {
+  const fs = await import('node:fs');
+  const dir = await import('node:fs/promises');
+  const tmp = await dir.mkdtemp('doodle-test-');
+  t.after(() => fs.rmSync(tmp, { recursive: true, force: true })); // 不留垃圾目录
+  const noSprite = '<!DOCTYPE html><html><body><canvas></canvas></body></html>'; // 无占位符
+  const router = createApiRouter({ ark: fakeArk(async () => htmlOk(noSprite)), gamesDir: tmp });
+  const r = await post(router, '/generate', { design: { title: 'T' }, spriteBase64: 'QUJD' });
+  assert.equal(r.status, 200);
+  assert.equal(r.payload.spriteMissing, true);
 });
 
 test('repair 把输入中的 data URL 换成占位符给模型，输出再回填', async () => {

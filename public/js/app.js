@@ -46,7 +46,7 @@ function renderVersions() {
     const b = document.createElement('button');
     b.textContent = v.label;
     b.className = i === sandbox.current ? 'active' : '';
-    b.onclick = () => sandbox.show(i);
+    b.onclick = async () => { await sandbox.show(i); renderVersions(); }; // show 改 current 后重刷高亮
     versionsEl.appendChild(b);
   });
 }
@@ -57,9 +57,15 @@ upload.addEventListener('change', async () => {
   preview.src = URL.createObjectURL(file);
   preview.hidden = false;
   timeline.innerHTML = '';
+  sandbox.reset(); // 新图重开一局：清空历史版本栈与沙箱
+  renderVersions();
+  reviseForm.hidden = true;
   try {
     const result = await runPipeline(file, { onStep: renderStep });
     renderPanel(result.analysis);
+    if (result.spriteMissing) {
+      timeline.insertAdjacentHTML('beforeend', '<li class="error">⚠️ 模型未使用精灵占位符，主角可能缺失——建议重新生成</li>');
+    }
     sandbox.pushVersion('v1 初版', result.html);
     const verdict = await checkAndRepair(result.html, sandbox, { onStep: renderStep });
     currentHtml = verdict.html;

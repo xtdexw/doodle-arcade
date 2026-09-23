@@ -28,7 +28,7 @@ export async function runPipeline(file, { onStep = () => {}, preprocess = prepro
   onStep('generate', 'running');
   const gen = await postJson('/api/generate', { design, spriteBase64: prep.spriteBase64, palette: analysis.palette });
   onStep('generate', 'done', gen);
-  return { ...prep, analysis, design, html: gen.html, fileSaved: gen.file };
+  return { ...prep, analysis, design, html: gen.html, fileSaved: gen.file, spriteMissing: gen.spriteMissing || false };
 }
 
 export async function checkAndRepair(html, sandbox, { onStep = () => {}, postJson = defaultPostJson, maxRepair = 2 } = {}) {
