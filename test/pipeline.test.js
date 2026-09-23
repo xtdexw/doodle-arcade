@@ -25,8 +25,10 @@ test('runPipeline 依次调用 analyze/design/generate 并回调步骤', async (
 });
 
 test('checkAndRepair：一次通过', async () => {
+  const steps = [];
   const sandbox = { load: async () => ({ ok: true, errors: [] }) };
-  const r = await checkAndRepair(HTML, sandbox, {});
+  const r = await checkAndRepair(HTML, sandbox, { onStep: (n, s) => steps.push([n, s]) });
+  assert.deepEqual(steps, [['repair', 'running'], ['repair', 'done']]);
   assert.equal(r.repaired, 0);
 });
 

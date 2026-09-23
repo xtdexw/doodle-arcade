@@ -32,8 +32,12 @@ export async function runPipeline(file, { onStep = () => {}, preprocess = prepro
 }
 
 export async function checkAndRepair(html, sandbox, { onStep = () => {}, postJson = defaultPostJson, maxRepair = 2 } = {}) {
+  onStep('repair', 'running');
   let verdict = await sandbox.load(html);
-  if (verdict.ok) return { html, repaired: 0, errors: [] };
+  if (verdict.ok) {
+    onStep('repair', 'done');
+    return { html, repaired: 0, errors: [] };
+  }
   let best = html;
   for (let i = 1; i <= maxRepair; i++) {
     onStep('repair', 'running', { round: i, errors: verdict.errors });
