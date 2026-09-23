@@ -17,7 +17,7 @@ main { display: grid; grid-template-columns: minmax(300px, 420px) 1fr; gap: 16px
 .upload { display: block; border: 2px dashed var(--line); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer; color: var(--dim); }
 .upload:hover { border-color: var(--accent); color: var(--text); }
 .upload input { display: none; }
-#preview { width: 100%; max-height: 220px; object-fit: contain; border-radius: 10px; margin-top: 12px; background: #fff; }
+#preview { width: 100%; border-radius: 10px; margin-top: 12px; background: #fff; }
 #timeline { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; }
 #timeline li { display: flex; gap: 8px; align-items: baseline; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; font-size: 0.9rem; }
 #timeline li.running { border-color: var(--accent); }
