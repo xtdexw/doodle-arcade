@@ -8,6 +8,16 @@ import { loadPrompt } from '../lib/prompts.js';
 
 const GENRES = new Set(['runner', 'flappy']);
 const FALLBACK_PALETTE = ['#2b2d42', '#8d99ae', '#edf2f4', '#ef233c', '#d90429'];
+const SPRITE_PLACEHOLDER = '__DOODLE_SPRITE__';
+const DATA_URL_RE = /data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]{100,}/g;
+
+function substituteSprite(html, dataUrl) {
+  return html.replaceAll(SPRITE_PLACEHOLDER, dataUrl);
+}
+function extractSpriteUrl(html) {
+  const m = html.match(DATA_URL_RE);
+  return m ? m[0] : null;
+}
 
 function validateAnalysis(a) {
   if (!a || typeof a !== 'object') return 'analysis 不是对象';
@@ -72,14 +82,16 @@ export function createApiRouter({ ark = createArk(), gamesDir } = {}) {
       const { design, spriteBase64, palette } = req.body ?? {};
       if (!design || !spriteBase64) return res.status(400).json({ error: 'design 与 spriteBase64 必填' });
       const prompt = loadPrompt('generate', {
-        SPRITE_DATA: `data:image/png;base64,${spriteBase64}`,
         PALETTE_JSON: JSON.stringify(Array.isArray(palette) && palette.length ? palette : FALLBACK_PALETTE),
         DESIGN_JSON: JSON.stringify(design),
       });
       const html = await chatHtml(ark, prompt);
+      // 模型只写占位符，服务端替换为真实精灵 data URL；模型没写占位符也照常返回（交由沙箱体检暴露）
+      const spriteUrl = `data:image/png;base64,${spriteBase64}`;
+      const finalHtml = substituteSprite(html, spriteUrl);
       const file = `doodle-${Date.now()}.html`;
-      fs.writeFileSync(path.join(GAMES, file), html);
-      res.json({ html, file: `games/${file}` });
+      fs.writeFileSync(path.join(GAMES, file), finalHtml);
+      res.json({ html: finalHtml, file: `games/${file}` });
     } catch (e) { next(e); }
   });
 
@@ -87,8 +99,12 @@ export function createApiRouter({ ark = createArk(), gamesDir } = {}) {
     try {
       const { html, errors } = req.body ?? {};
       if (!html || !Array.isArray(errors)) return res.status(400).json({ error: 'html 与 errors[] 必填' });
-      const prompt = loadPrompt('repair', { ERRORS: errors.join('\n'), HTML: html });
-      res.json({ html: await chatHtml(ark, prompt) });
+      // 模型不见 base64：先抽取 data URL 换成占位符，输出后再回填
+      const spriteUrl = extractSpriteUrl(html);
+      const modelHtml = spriteUrl ? html.replaceAll(spriteUrl, SPRITE_PLACEHOLDER) : html;
+      const prompt = loadPrompt('repair', { ERRORS: errors.join('\n'), HTML: modelHtml });
+      const out = spriteUrl ? substituteSprite(await chatHtml(ark, prompt), spriteUrl) : await chatHtml(ark, prompt);
+      res.json({ html: out });
     } catch (e) { next(e); }
   });
 
@@ -96,8 +112,11 @@ export function createApiRouter({ ark = createArk(), gamesDir } = {}) {
     try {
       const { html, instruction } = req.body ?? {};
       if (!html || !instruction) return res.status(400).json({ error: 'html 与 instruction 必填' });
-      const prompt = loadPrompt('revise', { INSTRUCTION: instruction, HTML: html });
-      res.json({ html: await chatHtml(ark, prompt) });
+      const spriteUrl = extractSpriteUrl(html);
+      const modelHtml = spriteUrl ? html.replaceAll(spriteUrl, SPRITE_PLACEHOLDER) : html;
+      const prompt = loadPrompt('revise', { INSTRUCTION: instruction, HTML: modelHtml });
+      const out = spriteUrl ? substituteSprite(await chatHtml(ark, prompt), spriteUrl) : await chatHtml(ark, prompt);
+      res.json({ html: out });
     } catch (e) { next(e); }
   });
 
