@@ -1,0 +1,13 @@
+{
+  "name": "doodle-arcade",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test",
+    "verify:ark": "node scripts/verify-ark.js",
+    "regress": "node scripts/regress.js"
+  },
+  "dependencies": { "express": "^4.21.2" }
+}
