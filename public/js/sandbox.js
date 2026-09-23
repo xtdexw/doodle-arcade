@@ -27,22 +27,6 @@ export function buildSrcdoc(html) {
       if (name === 'fillRect') setTimeout(function () { report(true, []); }, 0);
     };
   });
-  var fitRaf = 0;
-  function fitCanvas() {
-    var cv = document.querySelector('canvas');
-    if (!cv) return;
-    var s = Math.min(window.innerWidth / cv.width, window.innerHeight / cv.height);
-    if (!isFinite(s) || s <= 0) s = 1;
-    cv.style.position = 'absolute';
-    cv.style.left = '50%';
-    cv.style.top = '50%';
-    cv.style.transform = 'translate(-50%, -50%) scale(' + s + ')';
-    document.body.style.overflow = 'hidden';
-    document.documentElement.style.overflow = 'hidden';
-  }
-  function fitCanvasRaf() { cancelAnimationFrame(fitRaf); fitRaf = requestAnimationFrame(fitCanvas); }
-  window.addEventListener('load', fitCanvasRaf);
-  window.addEventListener('resize', fitCanvasRaf);
 })();
 </script>`;
   if (/<head>/i.test(html)) return html.replace(/<head>/i, '<head>' + probe);
@@ -57,7 +41,7 @@ export function createSandbox(container) {
   function freshIframe() {
     if (iframe) iframe.remove();
     iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%;height:100%;border:0;border-radius:12px;background:#111;';
+    iframe.style.cssText = 'width:100%;aspect-ratio:4/3;border:0;border-radius:12px;background:#111;';
     iframe.setAttribute('sandbox', 'allow-scripts');
     container.appendChild(iframe);
     return iframe;
