@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createArk, imageMessage } from '../lib/ark.js';
 import { extractJson, extractHtml } from '../lib/extract.js';
 import { loadPrompt } from '../lib/prompts.js';
+import { substituteSprite } from '../lib/spriteurl.js';
 
 export function listFixtureFiles(dir) {
   try {
@@ -25,11 +26,11 @@ export async function runFixtures({ dir = 'fixtures', ark = createArk() } = {}) 
       entry.genre = a.suggested_genre;
       const d = extractJson(await ark.chat([{ role: 'user', content: loadPrompt('design', { ANALYZE_JSON: JSON.stringify(a) }) }]));
       const html = extractHtml(await ark.chat([{ role: 'user', content: loadPrompt('generate', {
-        SPRITE_DATA: `data:image/png;base64,${b64}`,
         PALETTE_JSON: JSON.stringify(a.palette),
         DESIGN_JSON: JSON.stringify(d),
       }) }]));
-      fs.writeFileSync(path.join('games', `regress-${path.basename(file, path.extname(file))}.html`), html);
+      const finalHtml = substituteSprite(html, `data:image/${/\.jpe?g$/i.test(file) ? 'jpeg' : 'png'};base64,${b64}`);
+      fs.writeFileSync(path.join('games', `regress-${path.basename(file, path.extname(file))}.html`), finalHtml);
       entry.ok = true; entry.title = d.title;
     } catch (e) { entry.error = e.message.slice(0, 120); }
     results.push(entry);

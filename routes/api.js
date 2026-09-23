@@ -5,19 +5,10 @@ import express from 'express';
 import { createArk, imageMessage } from '../lib/ark.js';
 import { extractJson, extractHtml } from '../lib/extract.js';
 import { loadPrompt } from '../lib/prompts.js';
+import { SPRITE_PLACEHOLDER, substituteSprite, extractSpriteUrl } from '../lib/spriteurl.js';
 
 const GENRES = new Set(['runner', 'flappy']);
 const FALLBACK_PALETTE = ['#2b2d42', '#8d99ae', '#edf2f4', '#ef233c', '#d90429'];
-const SPRITE_PLACEHOLDER = '__DOODLE_SPRITE__';
-const DATA_URL_RE = /data:image\/[a-z+]+;base64,[A-Za-z0-9+/=]{100,}/g;
-
-function substituteSprite(html, dataUrl) {
-  return html.replaceAll(SPRITE_PLACEHOLDER, dataUrl);
-}
-function extractSpriteUrl(html) {
-  const m = html.match(DATA_URL_RE);
-  return m ? m[0] : null;
-}
 
 function validateAnalysis(a) {
   if (!a || typeof a !== 'object') return 'analysis 不是对象';
