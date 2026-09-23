@@ -7,6 +7,15 @@ const upload = $('upload'), preview = $('preview'), timeline = $('timeline');
 const panel = $('panel'), panelBody = $('panel-body'), stage = $('stage');
 const versionsEl = $('versions'), reviseForm = $('revise-form'), reviseInput = $('revise-input');
 
+let busy = false;
+function setBusy(b) {
+  busy = b;
+  upload.disabled = b;
+  reviseInput.disabled = b;
+  const btn = reviseForm.querySelector('button');
+  if (btn) btn.disabled = b;
+}
+
 const sandbox = createSandbox(stage);
 let currentHtml = null;
 const STEP_LABELS = { preprocess: '🖼️ 预处理', analyze: '👀 看图', design: '📋 设计', generate: '💻 写码', repair: '🔧 自检修复', revise: '✏️ 修改' };
@@ -54,6 +63,8 @@ function renderVersions() {
 upload.addEventListener('change', async () => {
   const file = upload.files[0];
   if (!file) return;
+  if (busy) return;
+  setBusy(true);
   preview.src = URL.createObjectURL(file);
   preview.hidden = false;
   timeline.innerHTML = '';
@@ -77,6 +88,8 @@ upload.addEventListener('change', async () => {
   } catch (e) {
     renderStep('generate', 'error', {});
     timeline.insertAdjacentHTML('beforeend', `<li class="error">出错了：${e.message}</li>`);
+  } finally {
+    setBusy(false);
   }
 });
 
@@ -84,6 +97,8 @@ reviseForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const instruction = reviseInput.value.trim();
   if (!instruction || !currentHtml) return;
+  if (busy) return;
+  setBusy(true);
   renderStep('revise', 'running');
   try {
     const { html } = await defaultPostJson('/api/revise', { html: currentHtml, instruction });
@@ -99,5 +114,7 @@ reviseForm.addEventListener('submit', async (e) => {
     reviseInput.value = '';
   } catch (err) {
     renderStep('revise', 'error', {});
+  } finally {
+    setBusy(false);
   }
 });
