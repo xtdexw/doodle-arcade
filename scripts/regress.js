@@ -5,6 +5,9 @@ import { createArk, imageMessage } from '../lib/ark.js';
 import { extractJson, extractHtml } from '../lib/extract.js';
 import { loadPrompt } from '../lib/prompts.js';
 import { substituteSprite } from '../lib/spriteurl.js';
+import { loadDotEnv } from '../lib/dotenv.js';
+
+loadDotEnv();
 
 export function listFixtureFiles(dir) {
   try {

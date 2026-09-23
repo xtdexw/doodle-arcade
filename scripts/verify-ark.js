@@ -2,6 +2,9 @@
 // 用一张程序生成的 16x16 红点 PNG 验证 doubao-seed-evolving 接受 image_url base64 输入。
 import { createArk, imageMessage } from '../lib/ark.js';
 import { redDotPngBase64 } from '../lib/testimg.js';
+import { loadDotEnv } from '../lib/dotenv.js';
+
+loadDotEnv();
 
 const ark = createArk({ maxRetries: 1 });
 const prompt = '这张图里主要是什么颜色？只回答颜色名。';

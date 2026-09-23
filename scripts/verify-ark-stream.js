@@ -1,6 +1,9 @@
 // scripts/verify-ark-stream.js —— 真机验证：方舟流式调用（SSE 增量累积）
 // 用一个稍长的问题确认 stream:true 链路可用，并展示增量块的到达节奏。
 import { createArk } from '../lib/ark.js';
+import { loadDotEnv } from '../lib/dotenv.js';
+
+loadDotEnv();
 
 const ark = createArk({ maxRetries: 1 });
 const t0 = Date.now();

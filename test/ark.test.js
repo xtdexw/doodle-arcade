@@ -86,6 +86,22 @@ test('流中途断开 触发重试并成功', async () => {
   assert.equal(calls, 2);
 });
 
+test('流中途 error 块触发重试', async () => {
+  let calls = 0;
+  const badStream = () => new ReadableStream({
+    start(c) {
+      c.enqueue(enc.encode(`data: ${JSON.stringify({ choices: [{ delta: { content: '半截' } }] })}\n\n`));
+      c.enqueue(enc.encode(`data: ${JSON.stringify({ error: { code: 'RequestBurstTooFast', message: 'too fast' } })}\n\n`));
+      c.enqueue(enc.encode('data: [DONE]\n\n'));
+      c.close();
+    },
+  });
+  const fetchImpl = async () => { calls++; return calls === 1 ? { status: 200, ok: true, body: badStream() } : streamOk(['完整回复']); };
+  const ark = createArk({ fetchImpl, sleep: () => Promise.resolve() });
+  assert.equal(await ark.chat([{ role: 'user', content: 'hi' }]), '完整回复');
+  assert.equal(calls, 2);
+});
+
 test('onChunk 对每个内容增量回调一次', async () => {
   const seen = [];
   const ark = createArk({ fetchImpl: async () => streamOk(['a', 'bc', 'd']) });
