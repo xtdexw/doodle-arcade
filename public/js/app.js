@@ -33,7 +33,7 @@ function renderPanel(analysis) {
     `<div class="card"><b>${c.name}</b>（${c.personality || ''}）<br>${c.desc || ''}</div>`).join('');
   const sw = analysis.palette.map((p) => `<span class="swatch" style="background:${p}" title="${p}"></span>`).join('');
   panelBody.innerHTML = `
-    <div>${sw}</div>
+    <div class="swatches">${sw}</div>
     <span class="chip">画风：${analysis.style || '—'}</span>
     <span class="chip">情绪：${analysis.mood || '—'}</span>
     <span class="chip">类型决策：${analysis.suggested_genre}（${analysis.genre_reason || ''}）</span>
@@ -85,6 +85,8 @@ reviseForm.addEventListener('submit', async (e) => {
     sandbox.pushVersion(`v${sandbox.versions.length + 1}：${instruction.slice(0, 8)}`, html);
     const v = await checkAndRepair(html, sandbox, { onStep: renderStep });
     currentHtml = v.html;
+    if (v.repaired > 0) sandbox.pushVersion(`修复版（第${v.repaired}轮）`, v.html);
+    if (v.repaired === -1) renderStep('repair', 'error', {});
     await sandbox.show(sandbox.versions.length - 1);
     renderVersions();
     renderStep('revise', 'done');
