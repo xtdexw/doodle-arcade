@@ -28,7 +28,7 @@ export async function runFixtures({ dir = 'fixtures', ark = createArk() } = {}) 
       const html = extractHtml(await ark.chat([{ role: 'user', content: loadPrompt('generate', {
         PALETTE_JSON: JSON.stringify(a.palette),
         DESIGN_JSON: JSON.stringify(d),
-      }) }]));
+      }) }], { temperature: 0.7, thinking: 'disabled', maxCompletionTokens: 32768 }));
       const finalHtml = substituteSprite(html, `data:image/${/\.jpe?g$/i.test(file) ? 'jpeg' : 'png'};base64,${b64}`);
       fs.writeFileSync(path.join('games', `regress-${path.basename(file, path.extname(file))}.html`), finalHtml);
       entry.ok = true; entry.title = d.title;
