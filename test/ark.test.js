@@ -93,3 +93,13 @@ test('onChunk 对每个内容增量回调一次', async () => {
   assert.deepEqual(seen, ['a', 'bc', 'd']);
   assert.equal(out, 'abcd');
 });
+
+test('thinking 与 max_completion_tokens 透传到请求体', async () => {
+  let body;
+  const fetchImpl = async (_u, init) => { body = JSON.parse(init.body); return streamOk(['ok']); };
+  const ark = createArk({ fetchImpl });
+  await ark.chat([{ role: 'user', content: 'hi' }], { thinking: 'disabled', maxCompletionTokens: 32768 });
+  assert.equal(body.thinking.type, 'disabled');
+  assert.equal(body.max_completion_tokens, 32768);
+  assert.ok(body.stream === true);
+});

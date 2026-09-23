@@ -64,7 +64,12 @@ export function createApiRouter({ ark = createArk(), gamesDir } = {}) {
   });
 
   async function chatHtml(ark, prompt) {
-    const out = await ark.chat([{ role: 'user', content: prompt }], { temperature: 0.7 });
+    // 代码任务关思考+放宽输出上限：ark max_tokens 默认 4k 且含思维链，思考会先耗尽预算致生成卡死
+    const out = await ark.chat([{ role: 'user', content: prompt }], {
+      temperature: 0.7,
+      thinking: 'disabled',
+      maxCompletionTokens: 32768,
+    });
     return extractHtml(out);
   }
 
