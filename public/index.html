@@ -1,0 +1,45 @@
+<!-- public/index.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>涂鸦游戏机 Doodle Arcade</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>🎨 涂鸦游戏机 <span class="en">Doodle Arcade</span></h1>
+    <p class="sub">拍一张手绘涂鸦 → 豆包 Seed-2.1-pro-0915 看图、设计、写码 → 还你一个能玩的游戏</p>
+  </header>
+
+  <main>
+    <section id="left">
+      <label class="upload" for="upload">📷 上传涂鸦照片
+        <input type="file" id="upload" accept="image/*">
+      </label>
+      <img id="preview" alt="涂鸦预览" hidden>
+      <ol id="timeline" aria-label="生成时间线"></ol>
+      <div id="panel" hidden>
+        <h2>🧠 AI 看到了什么</h2>
+        <div id="panel-body"></div>
+      </div>
+    </section>
+
+    <section id="right">
+      <div id="stage"><p class="hint">生成的游戏会出现在这里</p></div>
+      <div id="versions" role="tablist"></div>
+      <form id="revise-form" hidden>
+        <input id="revise-input" type="text" placeholder="试试：跳得再高一点 / 加金币 / 换成夜晚配色" autocomplete="off">
+        <button type="submit">改一下</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>Doodle Arcade · 由 Seed-2.1-pro-0915（doubao-seed-evolving）驱动 · 仅用于创作征集演示</p>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

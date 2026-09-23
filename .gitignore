@@ -1,0 +1,5 @@
+# .gitignore
+node_modules/
+.env
+games/*.html
+.claude/settings.local.json
