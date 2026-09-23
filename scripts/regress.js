@@ -18,9 +18,10 @@ export async function runFixtures({ dir = 'fixtures', ark = createArk() } = {}) 
   const results = [];
   for (const file of files) {
     const b64 = fs.readFileSync(file).toString('base64');
+    const mime = /\.jpe?g$/i.test(file) ? 'image/jpeg' : 'image/png';
     const entry = { file: path.basename(file), ok: false };
     try {
-      const a = extractJson(await ark.chat([imageMessage(loadPrompt('analyze'), b64, 'image/png')]));
+      const a = extractJson(await ark.chat([imageMessage(loadPrompt('analyze'), b64, mime)]));
       entry.genre = a.suggested_genre;
       const d = extractJson(await ark.chat([{ role: 'user', content: loadPrompt('design', { ANALYZE_JSON: JSON.stringify(a) }) }]));
       const html = extractHtml(await ark.chat([{ role: 'user', content: loadPrompt('generate', {
