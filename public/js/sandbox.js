@@ -41,7 +41,7 @@ export function createSandbox(container) {
   function freshIframe() {
     if (iframe) iframe.remove();
     iframe = document.createElement('iframe');
-    iframe.style.cssText = 'width:100%;aspect-ratio:4/3;border:0;border-radius:12px;background:#111;';
+    iframe.style.cssText = 'width:100%;height:100%;border:0;border-radius:12px;background:#111;';
     iframe.setAttribute('sandbox', 'allow-scripts');
     container.appendChild(iframe);
     return iframe;
